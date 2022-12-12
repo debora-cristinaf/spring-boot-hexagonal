@@ -1,8 +1,14 @@
-debora:
-  client:
-    address:
-      url: http://localhost:8082/addresses
+server:
+  port: 8081
+
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost:27017/customers
+      host: localhost
+      port: 27017
+      database: hexagonal
+
+arantes:
+  client:
+    address:
+      url: http://localhost:8082/addresses
