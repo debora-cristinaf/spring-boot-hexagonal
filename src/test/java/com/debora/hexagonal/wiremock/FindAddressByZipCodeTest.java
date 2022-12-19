@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -47,6 +49,27 @@ class FindAddressByZipCodeTest {
         Assertions.assertEquals(address.getState(), "Minas Gerais");
         Assertions.assertEquals(address.getCity(), "Uberlândia");
         Assertions.assertEquals(address.getStreet(), "Rua Hexagonal");
+
+    }
+
+    void shouldDelayResponseReturnDataFromClient() {
+        this.wireMockServer.stubFor(
+                WireMock.get("/33100000")
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody("{\n" +
+                                        "            \"street\": \"Rua Hexagonal\",\n" +
+                                        "            \"city\": \"Uberlândia\",\n" +
+                                        "            \"state\": \"Minas Gerais\"\n" +
+                                        "        }")
+                                .withFixedDelay(500)));
+
+        long start = System.currentTimeMillis();
+        var address = this.findAddressByZipCodeClient.find("33100000");
+
+        int duration = (int) (System.currentTimeMillis() - start);
+
+        assertThat(duration, greaterThanOrEqualTo(500));
 
     }
 }
